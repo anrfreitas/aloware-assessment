@@ -26,4 +26,17 @@ $api->version('v1', function ($api) {
     $api->get('/', function () {
         return 'It works!';
     });
+
+    $api->group(array('prefix' => 'blog-post'), function($api)
+    {
+        $controller = \App\Http\Controllers\CommentController::class;
+
+        $api->get('/{postId}/comments', "$controller@getByPostId");
+
+        $api->post('/{postId}/comment', "$controller@save");
+
+        $api->put('/{postId}/comment/{commentId}', "$controller@update");
+
+        $api->delete('/{postId}/comment/{commentId}', "$controller@delete");
+    });
 });

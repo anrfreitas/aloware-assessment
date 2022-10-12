@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->runCommentsTableSeeder();
     }
 
+    // @TODO - it doesn't look good, i'll later improve later by breaking those long lines
     private function runCommentsTableSeeder() {
         // First root comment tree
         DB::insert("INSERT INTO comments (post_id, parent_id, name, message, created_at, updated_at) values(1, null, 'andre', 'main message', '2022-10-12 00:00:00', '2022-10-12 00:00:00')"); // # 1 (main)
