@@ -1,0 +1,5 @@
+CREATE USER IF NOT EXISTS 'zero'@'%' IDENTIFIED WITH mysql_native_password BY 'secret';
+ALTER USER zero IDENTIFIED WITH mysql_native_password BY 'secret';
+GRANT ALL PRIVILEGES ON *.* TO 'zero'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+CREATE DATABASE IF NOT EXISTS zero_db;
