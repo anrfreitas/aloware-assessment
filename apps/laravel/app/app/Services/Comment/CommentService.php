@@ -2,8 +2,9 @@
 
 namespace App\Services\Comment;
 
-use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Support\Facades\DB;
+use App\Exceptions\CustomExceptionHandler;
 
 /**
  * Class CommentService
@@ -11,16 +12,20 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class CommentService
 {
-    public function getByPostId(int $postId): void
+    /**
+     * @param int $postId
+     * @return array
+    */
+    public function getByPostId(int $postId): array
     {
         try {
-            // @TODO
+            return DB::select("SELECT * from comments WHERE post_id = $postId");
         }
         catch(HttpException $e) {
             abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
-            $this->handleException($e);
+            CustomExceptionHandler::handleException($e);
         }
     }
 
@@ -33,7 +38,7 @@ class CommentService
             abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
-            $this->handleException($e);
+            CustomExceptionHandler::handleException($e);
         }
     }
 
@@ -50,7 +55,7 @@ class CommentService
             abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
-            $this->handleException($e);
+            CustomExceptionHandler::handleException($e);
         }
     }
 
@@ -63,16 +68,7 @@ class CommentService
             abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
-            $this->handleException($e);
+            CustomExceptionHandler::handleException($e);
         }
     }
-
-    private function handleException(\Exception $e): void {
-        if(env('APP_DEBUG', false)) {
-            abort(Response::HTTP_UNPROCESSABLE_ENTITY, $e->getMessage());
-        }
-
-        abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Unprocessable entity');
-    }
-
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
 use App\Http\Transformers\CommentTransformer;
 use App\Services\Comment\CommentService;
+use App\Exceptions\CustomExceptionHandler;
 
 /**
  * Class CommentController
@@ -16,13 +17,17 @@ use App\Services\Comment\CommentService;
 class CommentController extends Controller
 {
     public function getByPostId(
-        CommentTransformer $transformer,
         CommentService $service,
         int $postId
     ): Response {
-        // We'll need to transform those comments later :)
-        $comments = $service->getByPostId($postId);
-        return $this->response->noContent();
+        try {
+            return $this->response->array(
+                $this->getAllCommentsByPostId($service, $postId)
+            );
+        }
+        catch(\Exception $e) {
+            CustomExceptionHandler::handleException($e);
+        }
     }
 
     public function save(
@@ -30,9 +35,16 @@ class CommentController extends Controller
         CommentService $service,
         int $postId
     ): Response {
-        $data = $request->all();
-        $service->save($postId, $data);
-        return $this->response->noContent();
+        try {
+            $data = $request->all();
+            $service->save($postId, $data);
+            return $this->response->array(
+                $this->getAllCommentsByPostId($service, $postId)
+            );
+        }
+        catch(\Exception $e) {
+            CustomExceptionHandler::handleException($e);
+        }
     }
 
     public function update(
@@ -41,9 +53,16 @@ class CommentController extends Controller
         int $postId,
         int $commentId
     ): Response {
-        $data = $request->all();
-        $service->update($postId, $commentId, $data);
-        return $this->response->noContent();
+        try {
+            $data = $request->all();
+            $service->update($postId, $commentId, $data);
+            return $this->response->array(
+                $this->getAllCommentsByPostId($service, $postId)
+            );
+        }
+        catch(\Exception $e) {
+            CustomExceptionHandler::handleException($e);
+        }
     }
 
     public function delete(
@@ -51,7 +70,27 @@ class CommentController extends Controller
         int $postId,
         int $commentId
     ): Response {
-        $service->delete($postId, $commentId);
-        return $this->response()->noContent();
+        try {
+            $service->delete($postId, $commentId);
+            return $this->response->array(
+                $this->getAllCommentsByPostId($service, $postId)
+            );
+        }
+        catch(\Exception $e) {
+            CustomExceptionHandler::handleException($e);
+        }
+    }
+
+    private function getAllCommentsByPostId(
+        CommentService $service,
+        int $postId
+    ): array {
+        $comments = $service->getByPostId($postId);
+        try {
+            return (new CommentTransformer())->transform($comments);
+        }
+        catch(\Exception $e) {
+            CustomExceptionHandler::handleException($e);
+        }
     }
 }
