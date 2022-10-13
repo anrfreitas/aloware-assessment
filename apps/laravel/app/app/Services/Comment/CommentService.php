@@ -58,7 +58,11 @@ class CommentService
                 'updated_at' => Carbon::now()
             ];
 
-            DB::table('comments')->insert($insertData);
+            if(!DB::table('comments')->insert($insertData))
+                abort(
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'Failed to create comment'
+                );
         }
         catch(HttpException $e) {
             abort($e->getStatusCode(), $e->getMessage());
@@ -75,7 +79,18 @@ class CommentService
     ): void
     {
         try {
-            // @TODO
+            if(
+                !DB::table('comments')->where([
+                    ['post_id', $postId],
+                    ['id', $commentId],
+                ])->update([
+                    'message' => $data['message']
+                ])
+            )
+                abort(
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'Failed to delete comment'
+                );
         }
         catch(HttpException $e) {
             abort($e->getStatusCode(), $e->getMessage());
@@ -88,7 +103,16 @@ class CommentService
     public function delete(int $postId, int $commentId): void
     {
         try {
-            // @TODO
+            if(
+                !DB::table('comments')->where([
+                    ['post_id', $postId],
+                    ['id', $commentId],
+                ])->delete()
+            )
+                abort(
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'Failed to delete comment'
+                );
         }
         catch(HttpException $e) {
             abort($e->getStatusCode(), $e->getMessage());
