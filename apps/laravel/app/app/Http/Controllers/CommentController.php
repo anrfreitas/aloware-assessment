@@ -40,7 +40,7 @@ class CommentController extends Controller
             $service->save($postId, $data);
             return $this->response->array(
                 $this->getAllCommentsByPostId($service, $postId)
-            );
+            )->setStatusCode(201);
         }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
@@ -87,7 +87,7 @@ class CommentController extends Controller
     ): array {
         $comments = $service->getByPostId($postId);
         try {
-            return (new CommentTransformer())->transform($comments);
+            return (new CommentTransformer)->transform($comments);
         }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);

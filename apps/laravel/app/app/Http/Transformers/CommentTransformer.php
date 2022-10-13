@@ -6,8 +6,6 @@ use App\Transformers\AbstractTransFormer;
 
 class CommentTransformer extends AbstractTransFormer
 {
-    function __construct() {}
-
     /**
      * @param array $comments
      * @return array

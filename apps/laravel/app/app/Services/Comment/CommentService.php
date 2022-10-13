@@ -5,8 +5,10 @@ namespace App\Services\Comment;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\DB;
-use App\Exceptions\CustomExceptionHandler;
 use Carbon\Carbon;
+
+use App\Exceptions\CustomExceptionHandler;
+use App\Helpers\CommentHelper;
 
 /**
  * Class CommentService
@@ -34,12 +36,12 @@ class CommentService
     /**
      * @param int $postId
      * @param array $data
-     * @return array
+     * @return void
     */
     public function save(int $postId, array $data): void
     {
         try {
-            if(
+            if (
                 isset($data['parentId']) &&
                 !$this->allowedToComment($postId, $data['parentId'])
             ) {
@@ -58,7 +60,7 @@ class CommentService
                 'updated_at' => Carbon::now()
             ];
 
-            if(!DB::table('comments')->insert($insertData))
+            if (!DB::table('comments')->insert($insertData))
                 abort(
                     Response::HTTP_UNPROCESSABLE_ENTITY,
                     'Failed to create comment'
@@ -72,6 +74,12 @@ class CommentService
         }
     }
 
+    /**
+     * @param int $postId
+     * @param int $commentId
+     * @param array $data
+     * @return void
+    */
     public function update(
         int $postId,
         int $commentId,
@@ -79,7 +87,7 @@ class CommentService
     ): void
     {
         try {
-            if(
+            if (
                 !DB::table('comments')->where([
                     ['post_id', $postId],
                     ['id', $commentId],
@@ -100,10 +108,15 @@ class CommentService
         }
     }
 
+    /**
+     * @param int $postId
+     * @param int $commentId
+     * @return void
+    */
     public function delete(int $postId, int $commentId): void
     {
         try {
-            if(
+            if (
                 !DB::table('comments')->where([
                     ['post_id', $postId],
                     ['id', $commentId],
@@ -122,24 +135,24 @@ class CommentService
         }
     }
 
-    private function allowedToComment($postId, $parentId) {
-        $allowed = DB::select("
+    /**
+     * @param int $postId
+     * @param int $commentId
+     * @return bool
+    */
+    private function allowedToComment($postId, $parentId): bool {
+        $dbOutput = DB::select("
             SELECT
-                c1.parent_id as 'c1_parent_id',
-                c2.parent_id as 'c2_parent_id'
-            FROM comments c2
-            LEFT JOIN comments c1 on c1.id = c2.parent_id
+                c2.parent_id as 'c2_parent_id',
+                c3.parent_id as 'c3_parent_id'
+            FROM comments c3
+            LEFT JOIN comments c2 on c2.id = c3.parent_id
             WHERE
-                c2.post_id = $postId AND
-                c2.id = $parentId
+                c3.post_id = $postId AND
+                c3.id = $parentId
                 limit 1;
         ");
 
-        if(
-            count($allowed) > 0 &&
-            $allowed[0]->c1_parent_id &&
-            $allowed[0]->c2_parent_id
-        ) return false;
-        return true;
+        return CommentHelper::isThirdLayerSubComment($dbOutput);
     }
 }
