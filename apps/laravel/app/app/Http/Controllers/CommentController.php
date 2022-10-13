@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
 use App\Http\Transformers\CommentTransformer;
@@ -25,6 +27,9 @@ class CommentController extends Controller
                 $this->getAllCommentsByPostId($service, $postId)
             );
         }
+        catch(HttpException $e) {
+            abort($e->getStatusCode(), $e->getMessage());
+        }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
         }
@@ -41,6 +46,9 @@ class CommentController extends Controller
             return $this->response->array(
                 $this->getAllCommentsByPostId($service, $postId)
             )->setStatusCode(201);
+        }
+        catch(HttpException $e) {
+            abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
@@ -60,6 +68,9 @@ class CommentController extends Controller
                 $this->getAllCommentsByPostId($service, $postId)
             );
         }
+        catch(HttpException $e) {
+            abort($e->getStatusCode(), $e->getMessage());
+        }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
         }
@@ -76,6 +87,9 @@ class CommentController extends Controller
                 $this->getAllCommentsByPostId($service, $postId)
             );
         }
+        catch(HttpException $e) {
+            abort($e->getStatusCode(), $e->getMessage());
+        }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
         }
@@ -85,9 +99,12 @@ class CommentController extends Controller
         CommentService $service,
         int $postId
     ): array {
-        $comments = $service->getByPostId($postId);
         try {
+            $comments = $service->getByPostId($postId);
             return (new CommentTransformer)->transform($comments);
+        }
+        catch(HttpException $e) {
+            abort($e->getStatusCode(), $e->getMessage());
         }
         catch(\Exception $e) {
             CustomExceptionHandler::handleException($e);
