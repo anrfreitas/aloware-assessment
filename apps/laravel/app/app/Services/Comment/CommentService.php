@@ -162,9 +162,8 @@ class CommentService
     }
 
     /**
-     * @param int $postId
-     * @param int $commentId
-     * @return bool
+     * @param int $parentId
+     * @return void
     */
     private function checkIfParentCommentExists($parentId): void {
         $rows = DB::table('comments')->where('id', $parentId)->count('id');
