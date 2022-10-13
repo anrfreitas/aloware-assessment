@@ -41,6 +41,11 @@ class CommentService
     public function save(int $postId, array $data): void
     {
         try {
+
+            if(isset($data['parentId'])) {
+                $this->checkIfParentCommentExists($data['parentId']);
+            }
+
             if (
                 isset($data['parentId']) &&
                 !$this->allowedToComment($postId, $data['parentId'])
@@ -154,5 +159,21 @@ class CommentService
         ");
 
         return CommentHelper::isThirdLayerSubComment($dbOutput);
+    }
+
+    /**
+     * @param int $postId
+     * @param int $commentId
+     * @return bool
+    */
+    private function checkIfParentCommentExists($parentId): void {
+        $rows = DB::table('comments')->where('id', $parentId)->count('id');
+
+        if ($rows == 0) {
+            abort(
+                Response::HTTP_NOT_FOUND,
+                'Parent comment does not exists'
+            );
+        }
     }
 }

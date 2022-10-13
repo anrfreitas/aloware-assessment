@@ -54,6 +54,23 @@ class CommentTest extends TestCase
      * @test
      * @return void
      */
+    public function create_comment_endpoint_fails_due_unexisting_parent_comment()
+    {
+        $response = $this->postJson(
+            '/api/blog-post/1/comment',
+            [
+                "parentId" => 99,
+                "name" => "test",
+                "message" => "message-test",
+            ]
+        );
+        $response->assertStatus(404);
+    }
+
+    /**
+     * @test
+     * @return void
+     */
     public function create_first_layer_comment_gives_created_response()
     {
         $response = $this->postJson(
